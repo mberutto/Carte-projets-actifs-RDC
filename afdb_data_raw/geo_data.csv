@@ -1,0 +1,95 @@
+id,location,Province,lat,lon
+P-CD-A00-007,Tshopo,Tshopo,0.516667,25.2
+P-CD-AA0-019,Tshopo,Tshopo,0.516667,25.2
+P-CD-IA0-003,Tshopo,Tshopo,0.516667,25.2
+P-CD-DB0-009,Tshikapa,Kasai,-6.416667,20.8
+P-CD-I00-010,Tshala,Kasai-Oriental,-6.258333,23.926944
+P-CD-IA0-003,Sud-Ubangi,Sud Ubangi,3.25,19.766667
+P-CD-AA0-019,South Kivu,South Kivu,-3.22552,28.59604
+P-CD-AA0-022,South Kivu,South Kivu,-3.22552,28.59604
+P-CD-C00-002,South Kivu,South Kivu,-3.22552,28.59604
+P-CD-D00-006,South Kivu,South Kivu,-3.22552,28.59604
+P-CD-IA0-003,South Kivu,South Kivu,-3.22552,28.59604
+P-CD-AA0-022,Nyamukubi,South Kivu,-1.98361,28.90333
+P-CD-AA0-019,Nord-Ubangi,Nord-Ubangi,4.283333,21.016667
+P-CD-IA0-003,Nord-Ubangi,Nord-Ubangi,4.283333,21.016667
+P-CD-IA0-003,Nord Kivu,Nord Kivu,-0.6,29
+P-CD-DB0-012,Ndjili,Kinshasa,-4.408889,15.3775
+P-CD-I00-010,Mutoshi,Lualaba,-10.677815,25.535316
+P-CD-I00-010,Musonoie,Lualaba,-10.710876,25.399017
+P-CD-GB0-003,Moanda,Kongo Central,-5.934167,12.349444
+P-CD-AB0-006,Mbuji-Mayi,Kasai-Oriental,-6.15,23.6
+P-CD-DA0-003,Mbuji-Mayi,Kasai-Oriental,-6.15,23.6
+P-CD-E00-006,Mbuji-Mayi,Kasai-Oriental,-6.15,23.6
+P-CD-A00-007,Maniema,Maniema,-2.95,25.95
+P-CD-AA0-019,Maniema,Maniema,-2.95,25.95
+P-CD-E00-006,Maniema,Maniema,-2.95,25.95
+P-CD-AA0-022,Makuta,Kongo Central,-5.26875,15.10365
+P-CD-C00-002,Mai Ndombe,Mai Ndombe,-1.95,18.266667
+P-CD-DB0-012,Mai Ndombe,Mai Ndombe,-1.95,18.266667
+P-CD-IA0-003,Mai Ndombe,Mai Ndombe,-1.95,18.266667
+P-CD-I00-010,Luisha,Haut-Katanga,-11.168676,27.008686
+P-CD-I00-010,Luambo,Haut-Katanga,-10.82,26.78
+P-CD-I00-010,Lualaba,Lualaba,-10.716667,25.466667
+P-CD-A00-007,Lomami,Lomami,-6.133333,24.483333
+P-CD-AA0-019,Lomami,Lomami,-6.133333,24.483333
+P-CD-AAG-006,Lomami,Lomami,-6.133333,24.483333
+P-CD-C00-002,Lomami,Lomami,-6.133333,24.483333
+P-CD-E00-006,Lomami,Lomami,-6.133333,24.483333
+P-CD-IA0-003,Lomami,Lomami,-6.133333,24.483333
+P-CD-I00-010,Likasi,Haut-Katanga,-10.983333,26.733333
+P-CD-A00-007,Kwilu,Kwilu,-5.033333,18.816667
+P-CD-AA0-019,Kwilu,Kwilu,-5.033333,18.816667
+P-CD-AB0-007,Kwilu,Kwilu,-5.033333,18.816667
+P-CD-DB0-012,Kwilu,Kwilu,-5.033333,18.816667
+P-CD-AB0-007,Kwango,Kwango,-4.821844,17.039881
+P-CD-C00-002,Kwango,Kwango,-4.821844,17.039881
+P-CD-DB0-012,Kwango,Kwango,-4.821844,17.039881
+P-CD-IA0-003,Kwango,Kwango,-4.821844,17.039881
+P-CD-FA0-011,Kongo Central,Kongo Central,-5.816667,13.483333
+P-CD-AB0-006,Kisangani,Tshopo,0.516667,25.2
+P-CD-DA0-003,Kisangani,Tshopo,0.516667,25.2
+P-CD-I00-010,Kipushi,Haut-Katanga,-11.7625,27.25
+P-CD-AB0-006,Kinshasa City,Kinshasa,-4.321944,15.311944
+P-CD-DB0-012,Kinshasa City,Kinshasa,-4.321944,15.311944
+P-CD-EAZ-002,Kinshasa City,Kinshasa,-4.321944,15.311944
+P-CD-FA0-011,Kinshasa City,Kinshasa,-4.321944,15.311944
+P-CD-GB0-003,Kinshasa City,Kinshasa,-4.321944,15.311944
+P-CD-H00-002,Kinshasa City,Kinshasa,-4.321944,15.311944
+P-CD-HAB-005,Kinshasa City,Kinshasa,-4.321944,15.311944
+P-CD-KF0-012,Kinshasa City,Kinshasa,-4.321944,15.311944
+P-CD-DA0-003,Kindu,Maniema,-2.95,25.95
+P-CD-A00-007,Kibombo,Maniema,-9.183,25.867
+P-CD-DB0-012,Kenge,Kwango,-4.805556,17.041667
+P-CD-A00-007,Kazongo,Maniema,-4.45,26.65
+P-CD-I00-010,Kawama,Haut-Katanga,-9.52875,28.42518
+P-CD-AB0-006,Haut-Katanga,Haut-Katanga,-11.666667,27.483333
+P-CD-I00-010,Haut-Katanga,Haut-Katanga,-11.666667,27.483333
+P-CD-I00-010,Kasulo,Lualaba,-10.716667,25.466667
+P-CD-C00-002,Kasaï-Oriental,Kasaï-Oriental,-6.15,23.6
+P-CD-IA0-003,Kasaï-Oriental,Kasaï-Oriental,-6.15,23.6
+P-CD-AA0-019,Kasai-Central,Kasai-Central,-5.9,22.45
+P-CD-AB0-007,Kasai,Kasai,-5.35,21.416667
+P-CD-A00-007,Kasai,Kasai,-5.35,21.416667
+P-CD-AA0-019,Kasai,Kasai,-5.35,21.416667
+P-CD-AB0-006,Kasai,Kasai,-5.35,21.416667
+P-CD-AB0-007,Kasai,Kasai,-5.35,21.416667
+P-CD-DB0-009,Kasai,Kasai,-5.35,21.416667
+P-CD-DB0-012,Kasai,Kasai,-5.35,21.416667
+P-CD-E00-006,Kasai,Kasai,-5.35,21.416667
+P-CD-FA0-011,Kasai,Kasai,-5.35,21.416667
+P-CD-I00-010,Kapata,Haut-Katanga,-10.75490,25.38425
+P-CD-A00-007,Kanyama,Haut-Lomami,-7.57,24.17
+P-CD-AB0-006,Kananga,Kasai-Central,-5.897,22.448833
+P-CD-E00-006,Kananga,Kasai-Central,-5.897,22.448833
+P-CD-DB0-009,Kamuesha,Kasai,-6.20,21.45
+P-CD-I00-010,Kambove,Haut-Katanga,-10.876389,26.596944
+P-CD-A00-007,Kabambare,Maniema,-4.5,27.75
+P-CD-AB0-006,Ilebo,Kasai,-4.316667,20.6
+P-CD-A00-007,Idiofa,Kwilu,-4.966798,19.591026
+P-CD-D00-006,Goma,Nord Kivu,-1.679444,29.233611
+P-CD-AAG-006,Gandajika,Lomami,-6.75,23.966667
+P-CD-AA0-022,Bushushu,Sud-Kivu,-2.104167,28.458333
+P-CD-A00-007,Bulungu,Kwilu,-4.55,18.6
+P-CD-D00-006,Bukavu,Sud-Kivu,-2.506111,28.860833
+P-CD-DB0-012,Batshamba,Kasai,-6.2840,20.726
