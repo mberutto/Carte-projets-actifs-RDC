@@ -1,0 +1,90 @@
+---
+title: "Creating Data Base Active Projects"
+author: "Mateus Berutto Figueiredo"
+date: "2025-09-29"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# World Bank
+
+```{r}
+# Loading libraries 
+library(sf)
+library(dplyr)
+library(geodata)
+library(terra)
+library(writexl)
+
+# Loading data
+geo_data <- read.csv("wb_data_clean/wb_geo.csv")
+geo_data <- geo_data %>% 
+  rename("id" = "Project.ID") 
+
+sector_data <- read.csv("wb_data_clean/wb_sectors.csv")
+sector_data <- sector_data %>% 
+  rename("id" = "Project.ID")
+
+theme_data <- read.csv("wb_data_clean/wb_themes.csv")
+theme_data <- theme_data %>% 
+  rename("id" = "Project.ID")
+
+financers_data <- read.csv("wb_data_clean/wb_financers.csv")
+financers_data <- financers_data %>% 
+  rename("id" = "Project")
+
+projects_data <- read.csv("wb_data_clean/wb_projects.csv")
+
+# Finding all unique sectors
+sector_data_unique <- sector_data %>%
+  group_by(id) %>%
+  summarise(
+    all_sectors = paste(unique(Major.Sector), collapse = ", ")
+  ) %>%
+  ungroup()
+
+# Finding all unique provinces
+adm1 <- geodata::gadm(country = "COD", level = 1, path = tempdir())  # SpatVector
+adm1_sf <- st_as_sf(adm1) %>% st_make_valid()
+st_crs(adm1_sf) <- 4326  # WGS84 (usually already set)
+
+pts <- st_as_sf(geo_data, coords = c("GEO.Longitude.Number", "GEO.Latitude.Number"), crs = 4326, remove = FALSE)
+
+join_res <- st_join(pts, adm1_sf %>% select(province = NAME_1), join = st_intersects, left = TRUE)
+
+geo_with_province <- join_res %>%
+  st_drop_geometry() %>%
+  select(id, GEO.Latitude.Number, GEO.Longitude.Number, province)
+
+geo_with_province_unique <- geo_with_province %>%
+  group_by(id) %>%
+  summarise(
+    provinces = paste(unique(province), collapse = ", ")
+  ) %>%
+  ungroup()
+
+# Finding amount total
+financers_summarised <- financers_data %>%
+  group_by(id) %>%
+  summarise(
+    total_amount_usd = sum(Amount..USD., na.rm = TRUE)
+  ) %>%
+  ungroup()
+
+# Merging 
+merged_wb_final <- projects_data %>%
+  select(id, project_name, impagency, curr_total_commitment) %>%
+  left_join(sector_data_unique %>% select(id, all_sectors), by = "id") %>%
+  left_join(geo_with_province_unique %>% select(id, provinces), by = "id")
+
+# Downloading file
+write_xlsx(
+  merged_wb_final,
+  path = "/Users/mateusberuttofigueiredo/Desktop/UN RCO/IFIs/final_data_lemarquis/merged_wb_final.xlsx"
+)
+
+
+```

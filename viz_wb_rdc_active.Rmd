@@ -1,0 +1,294 @@
+---
+title: "Visualisation des projets actifs de la Banque mondiale et la Banque africaine de développement en RDC"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r loading_packages, echo=FALSE, include=FALSE}
+# Loading required packages
+library(tidyverse)
+library(dplyr)
+library(scales)
+library(leaflet)
+library(htmltools)
+```
+
+```{r loading_data, echo=FALSE, include=FALSE}
+# ---------------------------------------------------------------------
+# Loading data for WB projects and renaming columns for consistency
+geo_data <- read.csv("wb_data_clean/wb_geo.csv")
+geo_data <- geo_data %>% 
+  rename("id" = "Project.ID") 
+
+sector_data <- read.csv("wb_data_clean/wb_sectors.csv")
+sector_data <- sector_data %>% 
+  rename("id" = "Project.ID")
+
+theme_data <- read.csv("wb_data_clean/wb_themes.csv")
+theme_data <- theme_data %>% 
+  rename("id" = "Project.ID")
+
+financers_data <- read.csv("wb_data_clean/wb_financers.csv")
+financers_data <- financers_data %>% 
+  rename("id" = "Project")
+
+projects_data <- read.csv("wb_data_clean/wb_projects.csv")
+
+# Loading data for BAD projects
+active_projects <- read.csv("afdb_data_raw/acive_projects.csv")
+geo_bad <- read.csv("afdb_data_raw/geo_data.csv")
+
+# Reading PBF data
+pbf_raw <- read.csv("pbf_data/pbf.csv")
+```
+
+```{r merging_data, echo=FALSE, include=FALSE}
+# ---------------------------------------------------------------------
+### Merging WB data ###
+  
+# Select only the columns you want from geo_data
+geo_subset <- geo_data[, c("id", "GEO.Latitude.Number", "GEO.Longitude.Number")]
+
+# Select only the columns you want from projects_data
+proj_subset <- projects_data[, c("id", "project_name", "curr_project_cost")]
+
+# Merge them by "id"
+merged_data <- merge(
+  geo_subset,
+  proj_subset,
+  by = "id",
+  all.x = TRUE # keep all geo_data rows even if no match in projects_data
+)
+
+# Finding all unique sectors per project
+all_sector_unique_id <- sector_data %>%
+  group_by(id) %>%
+  summarise(
+    all_sectors = paste(unique(Major.Sector), collapse = ", ")
+  )
+
+# Adding unqiue sectors
+merged_data <- merge(
+  merged_data,
+  all_sector_unique_id,
+  by = "id",
+  all.x = TRUE # keep all geo_data rows even if no match in projects_data
+)
+
+# Renaming lat and lon
+merged_data <- merged_data %>%
+  rename("lat" = "GEO.Latitude.Number") %>%
+  rename("lon" = "GEO.Longitude.Number")
+
+# Cleaning format of cost
+merged_data$curr_project_cost_clean <- paste0(
+  "USD ",
+  comma(merged_data$curr_project_cost, accuracy = 1)
+)
+
+### Merging BAD data ###
+
+# Finding all locations for a given project
+all_locations_unique_id <- geo_bad %>%
+  group_by(id) %>%
+  summarise(
+    all_locations = paste(unique(location), collapse = ", ")
+  )
+
+# Selecting relevant columns from active projects df
+active_projects_subset <- active_projects[, c("id", "title", "total_disbursements..UA.", "total_commitments..UA.", "AfDB.Sector")]
+
+# Merge them by "id"
+merged_data_bad <- merge( # Adding most columns
+  geo_bad,
+  active_projects_subset,
+  by = "id",
+  all.x = TRUE
+)
+merged_data_bad <- merge( # Adding all unique locations
+  merged_data_bad,
+  all_locations_unique_id,
+  by = "id",
+  all.x = TRUE
+)
+
+# Cleaning data for funds
+merged_data_bad$total_disbursements_clean <- paste0(
+  "USD ",
+  comma(merged_data_bad$total_disbursements..UA., accuracy = 1)
+)
+merged_data_bad$total_commitments_clean <- paste0(
+  "USD ",
+  comma(merged_data_bad$total_commitments..UA., accuracy = 1)
+)
+
+### PBF data ###
+pbf_raw$Date_debut <- trimws(pbf_raw$Date_debut)
+pbf_raw$Date_fin   <- trimws(pbf_raw$Date_fin)
+pbf_raw$Date_debut <- as.Date(
+  pbf_raw$Date_debut,
+  tryFormats = c("%m/%d/%Y", "%m/%d/%y", "%d/%m/%Y", "%d/%m/%y", "%Y-%m-%d")
+)
+pbf_raw$Date_fin <- as.Date(
+  pbf_raw$Date_fin,
+  tryFormats = c("%m/%d/%Y", "%m/%d/%y", "%d/%m/%Y", "%d/%m/%y", "%Y-%m-%d")
+)
+
+# Quick check
+str(pbf_raw$Date_debut); str(pbf_raw$Date_fin)
+
+today <- as.Date("09/25/25", format = "%m/%d/%y")
+pbf_raw <- subset(pbf_raw, Date_fin > today)
+```
+
+```{r creating_visualization, echo=FALSE, message=FALSE, warning=FALSE}
+# --- Packages ----------------------------------------------------------------
+library(dplyr)
+library(leaflet)
+library(htmltools)  # for htmlEscape in popups
+
+# --- Helpers -----------------------------------------------------------------
+parse_date_safe <- function(x) {
+  # Tries common formats; returns NA if none fit
+  as.Date(x, tryFormats = c("%m/%d/%y", "%m/%d/%Y", "%d/%m/%y", "%d/%m/%Y"))
+}
+
+fmt_budget_usd <- function(x) {
+  if (is.numeric(x)) {
+    paste0("USD ", format(x, big.mark = ",", scientific = FALSE))
+  } else {
+    # Fallback if it's already character
+    paste0("USD ", x)
+  }
+}
+
+fmt_date_display <- function(x) {
+  d <- parse_date_safe(x)
+  ifelse(is.na(d), x, format(d, "%d %b %Y"))
+}
+
+# --- Reproducible jitter -----------------------------------------------------
+set.seed(123)
+
+# --- World Bank data (blue) --------------------------------------------------
+merged_data <- merged_data %>%
+  filter(!is.na(lat), !is.na(lon)) %>%
+  mutate(
+    lat_jitter = jitter(lat, amount = 0.01),
+    lon_jitter = jitter(lon, amount = 0.01)
+  )
+
+wb_popup <- ~paste0(
+  "<b>Project ID:</b> ", htmlEscape(id), "<br>",
+  "<b>Project Name:</b> ", htmlEscape(project_name), "<br>",
+  "<b>Cost:</b> ", htmlEscape(curr_project_cost_clean), "<br>",
+  "<b>Sectors:</b> ", htmlEscape(all_sectors)
+)
+
+# --- AfDB data (red) ---------------------------------------------------------
+merged_data_bad <- merged_data_bad %>%
+  filter(!is.na(lat), !is.na(lon)) %>%
+  mutate(
+    lat_jitter = jitter(lat, amount = 0.01),
+    lon_jitter = jitter(lon, amount = 0.01)
+  )
+
+afdb_popup <- ~paste0(
+  "<b>Title:</b> ", htmlEscape(title), "<br>",
+  "<b>ID:</b> ", htmlEscape(id), "<br>",
+  "<b>Location:</b> ", htmlEscape(location), "<br>",
+  "<b>Province:</b> ", htmlEscape(Province), "<br>",
+  "<b>Sector:</b> ", htmlEscape(`AfDB.Sector`), "<br>",
+  "<b>All locations:</b> ", htmlEscape(all_locations), "<br>",
+  "<b>Total disbursements:</b> ", htmlEscape(total_disbursements_clean), "<br>",
+  "<b>Total commitments:</b> ", htmlEscape(total_commitments_clean)
+)
+
+# --- PBF data (yellow) -------------------------------------------------------
+# Expected columns:
+# "id_projet", "Thématique", "Agence", "Budget..USD.", "Province",
+# "Territoire.Ville", "lat", "lon", "Date_debut", "Date_fin", "Logo_agence"
+pbf_raw_clean <- pbf_raw %>%
+  filter(!is.na(lat), !is.na(lon)) %>%
+  mutate(
+    lat_jitter = jitter(lat, amount = 0.01),
+    lon_jitter = jitter(lon, amount = 0.01),
+    Budget_display = fmt_budget_usd(`Budget..USD.`),
+    Date_debut_display = fmt_date_display(Date_debut),
+    Date_fin_display   = fmt_date_display(Date_fin)
+  )
+
+pbf_popup <- ~paste0(
+  "<b>Project ID:</b> ", htmlEscape(id_projet), "<br>",
+  "<b>Theme:</b> ", htmlEscape(Thématique), "<br>",
+  "<b>Agency:</b> ", htmlEscape(Agence), "<br>",
+  "<b>Territory/City:</b> ", htmlEscape(`Territoire.Ville`), "<br>",
+  "<b>Province:</b> ", htmlEscape(Province), "<br>",
+  "<b>Budget:</b> ", htmlEscape(Budget_display), "<br>",
+  "<b>Begin date:</b> ", htmlEscape(Date_debut_display), "<br>",
+  "<b>End date:</b> ", htmlEscape(Date_fin_display)
+)
+
+# --- Map ---------------------------------------------------------------------
+m <- leaflet() %>%
+  addTiles() %>%
+
+  # World Bank (blue)
+  addCircleMarkers(
+    data = merged_data,
+    lng = ~lon_jitter, lat = ~lat_jitter,
+    popup = wb_popup,
+    group = "World Bank",
+    radius = 5,
+    color = "blue", fillColor = "blue",
+    fillOpacity = 0.7, stroke = FALSE
+  ) %>%
+
+  # African Development Bank (red)
+  addCircleMarkers(
+    data = merged_data_bad,
+    lng = ~lon_jitter, lat = ~lat_jitter,
+    popup = afdb_popup,
+    group = "African Development Bank",
+    radius = 5,
+    color = "red", fillColor = "red",
+    fillOpacity = 0.7, stroke = FALSE
+  ) %>%
+
+  # UN PBF (yellow)
+  addCircleMarkers(
+    data = pbf_raw_clean,
+    lng = ~lon_jitter, lat = ~lat_jitter,
+    popup = pbf_popup,
+    group = "UN PBF",
+    radius = 5,
+    color = "gold", fillColor = "gold",
+    fillOpacity = 0.8, stroke = FALSE
+  ) %>%
+
+  # Legend + layer toggle
+  addLegend(
+    position = "bottomright",
+    colors = c("blue", "red", "gold"),
+    labels = c("World Bank", "African Development Bank", "UN PBF"),
+    title = "Project Source"
+  ) %>%
+  addLayersControl(
+    overlayGroups = c("World Bank", "African Development Bank", "UN PBF"),
+    options = layersControlOptions(collapsed = FALSE)
+  )
+
+m
+
+```
+
+Note : les projets *Purchase / Sale of Emission Reductions (ER) to be generated under the Mai Ndombe ER Program (P160320)* et *First DRC Governance, Transparency and Economic Resilience Development Policy Financing (P507861)* de la Banque mondiale n’ont pas été inclus dans cette visualisation car ils n’ont pas de données géospatiales associées.
+
+## Appendix
+
+```{r ref.label=knitr::all_labels(), echo=TRUE, eval=FALSE}
+
+```
